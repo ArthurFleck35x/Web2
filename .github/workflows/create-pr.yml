@@ -3,7 +3,7 @@ name: Demo to Create automatic Pull Request # Name des Workflows
 on:
   push: # Event, das den Workflow auslöst
     branches: 
-      - feature-branch # Start des Workflows bei commit auf feature-branch
+      - main # Start des Workflows bei commit auf main-branch
 
 jobs:
   updateAuthor: # Job-Name
