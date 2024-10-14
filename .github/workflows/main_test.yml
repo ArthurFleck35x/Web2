@@ -1,0 +1,34 @@
+name: Demo to Create automatic Pull Request # Name des Workflows
+
+on:
+  push: # Event, das den Workflow auslöst
+    branches: 
+      - main # Start des Workflows bei commit auf main-branch
+
+jobs:
+  updateAuthor: # Job-Name
+    runs-on: ubuntu-latest # Betriebssystem, auf dem der Workflow ausgeführt wird
+    steps:
+      - name: Checkout Repository # Repository clonen
+        uses: actions/checkout@v2  # Version des actions/checkout@v2-Actions
+
+      - name: extract git commit data # Git-Commit-Daten extrahieren
+        uses: rlespinasse/git-commit-data-action@v1   # Version des rlespinasse/git-commit-data-action@v1-Actions
+
+      - name: update author information # Autor-Informationen aktualisieren
+        run: echo §{{ env.GIT_COMMIT_AUTHOR_NAME }}§ >AUTHOR  # Autor-Informationen in Datei AUTHOR schreiben
+
+      - name: Create Pull Request # Pull Request erstellen
+        uses: peter-evans/create-pull-request@v3 # Version des peter-evans/create-pull-request@v3-Actions
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # GitHub-Token
+          branch: "auto-pr-branch" # Branch, in den gemergt werden soll
+          base: "main" # Basis-Branch
+          commit-message: "Automated commit message" # Commit-Nachricht
+          title: "Automated Pull Request" # Titel des Pull Requests
+          commiter: ${{ steps.extract.outputs.gitCommitAuthorName }} # Commiter
+          body: | # Inhalt des Pull Requests
+            This is an automated pull request created by a GitHub Actions workflow. 
+          delete-branch: true # Branch nach Merge löschen
+          labels: automated-pr # Label
+          reviewers: "username1,username2"  # Reviewer
