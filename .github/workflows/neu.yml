@@ -1,0 +1,38 @@
+name: Demo to Create automatic Pull Request
+
+on:
+  push:
+    branches: 
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  updateAuthor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: extract git commit data
+        id: extract
+        uses: rlespinasse/git-commit-data-action@v1
+
+      - name: update author information
+        run: echo ${{ steps.extract.outputs.gitCommitAuthorName }} > AUTHOR
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "auto-pr-branch"
+          base: "main"
+          commit-message: "Automated commit message"
+          title: "Automated Pull Request"
+          committer: "ArthurFleck35x <arthurfleck35x@example.com>"
+          body: |
+            This is an automated pull request created by a GitHub Actions workflow.
+          delete-branch: true
+          labels: automated-pr
+          reviewers: "username1,username2"
