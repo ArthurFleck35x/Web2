@@ -7,7 +7,7 @@ on:
 
 jobs:
   updateAuthor: # Job-Name
-    runs-on: ubuntu-latest # Betriebssystem, auf dem der Workflow ausgeführt wird
+    runs-on: windows-latest # Betriebssystem, auf dem der Workflow ausgeführt wird
     steps:
       - name: Checkout Repository # Repository clonen
         uses: actions/checkout@v2  # Version des actions/checkout@v2-Actions
