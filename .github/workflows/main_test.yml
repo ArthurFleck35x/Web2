@@ -26,7 +26,6 @@ jobs:
           base: "main" # Basis-Branch
           commit-message: "Automated commit message" # Commit-Nachricht
           title: "Automated Pull Request" # Titel des Pull Requests
-          commiter: ${{ steps.extract.outputs.gitCommitAuthorName }} # Commiter
           body: | # Inhalt des Pull Requests
             This is an automated pull request created by a GitHub Actions workflow. 
           delete-branch: true # Branch nach Merge löschen
