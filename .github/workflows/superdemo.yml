@@ -45,22 +45,16 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       
-      # Checkout gh-pages branch
-      - name: Checkout gh-pages branch
-        run: |
-          git fetch origin
-          git checkout -B gh-pages
-      
-      # Move the generated HTML file to the gh-pages branch
+      # Move the generated HTML file to index.html
       - name: Move HTML file
         run: |
           move zusammenfassung.html index.html
       
-      # Commit and push the changes to gh-pages branch using PAT
+      # Commit and push the changes to main branch using PAT
       - name: Commit and push changes
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_DEPLOY_KEY }}
         run: |
           git add index.html
-          git commit -m "Deploy Zusammenfassung to GitHub Pages"
-          git push https://github.com/${{ github.repository }} gh-pages --force
+          git commit -m "Deploy Zusammenfassung to main"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main --force
