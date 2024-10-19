@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Create an HTML file
+      - name: Create an HTML file
+        run: |
+          @"
+          <html lang='de'>
+          <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Zusammenfassung</title>
+            <style>
+              body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+              .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); }
+              h1 { color: #333333; text-align: center; }
+              p { color: #555555; font-size: 1.1em; line-height: 1.6; }
+            </style>
+          </head>
+          <body>
+            <div class='container'>
+              <h1>Zusammenfassung</h1>
+              <p>Jetzt gibt es noch eine kleine Zusammenfassung.</p>
+            </div>
+          </body>
+          </html>
+          "@ | Out-File -Encoding utf8 zusammenfassung.html
+
+      # Setup Git to use the PAT
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      # Checkout gh-pages branch
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin
+          git checkout -B gh-pages
+      
+      # Move the generated HTML file to the gh-pages branch
+      - name: Move HTML file
+        run: |
+          move zusammenfassung.html index.html
+      
+      # Commit and push the changes to gh-pages branch using PAT
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        run: |
+          git add index.html
+          git commit -m "Deploy Zusammenfassung to GitHub Pages"
+          git push https://github.com/${{ github.repository }} gh-pages --force
