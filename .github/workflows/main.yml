@@ -1,35 +1,63 @@
-name: Demo to Create automatic Pull Request # Name des Workflows
+name: CI
 
+# Controls when the workflow will run
 on:
-  push: # Event, das den Workflow auslöst
-    branches: 
-      - main # Start des Workflows bei commit auf main-branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  updateAuthor: # Job-Name
-    runs-on: ubuntu-latest # Betriebssystem, auf dem der Workflow ausgeführt wird
+  build:
+    runs-on: windows-latest  # Use windows-latest runner
+
     steps:
-      - name: Checkout Repository # Repository clonen
-        uses: actions/checkout@v2  # Version des actions/checkout@v2-Actions
+      - uses: actions/checkout@v4
 
-      - name: extract git commit data # Git-Commit-Daten extrahieren
-        uses: rlespinasse/git-commit-data-action@v1   # Version des rlespinasse/git-commit-data-action@v1-Actions
+      # Create an HTML file with inline CSS for design
+      - name: Create an HTML file
+        run: |
+          echo ^<html lang='de'^> > zusammenfassung.html
+          echo ^<head^> >> zusammenfassung.html
+          echo ^<meta charset='UTF-8'^> >> zusammenfassung.html
+          echo ^<meta name='viewport' content='width=device-width, initial-scale=1.0'^> >> zusammenfassung.html
+          echo ^<title^>Zusammenfassung^</title^> >> zusammenfassung.html
+          echo ^<style^> >> zusammenfassung.html
+          echo body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; } >> zusammenfassung.html
+          echo .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); } >> zusammenfassung.html
+          echo h1 { color: #333333; text-align: center; } >> zusammenfassung.html
+          echo p { color: #555555; font-size: 1.1em; line-height: 1.6; } >> zusammenfassung.html
+          echo ^</style^> >> zusammenfassung.html
+          echo ^</head^> >> zusammenfassung.html
+          echo ^<body^> >> zusammenfassung.html
+          echo ^<div class='container'^> >> zusammenfassung.html
+          echo ^<h1^>Zusammenfassung^</h1^> >> zusammenfassung.html
+          echo ^<p^>Jetzt gibt es noch eine kleine Zusammenfassung.^</p^> >> zusammenfassung.html
+          echo ^</div^> >> zusammenfassung.html
+          echo ^</body^> >> zusammenfassung.html
+          echo ^</html^> >> zusammenfassung.html
 
-      - name: update author information # Autor-Informationen aktualisieren
-        run: echo §{{ env.GIT_COMMIT_AUTHOR_NAME }}§ >AUTHOR  # Autor-Informationen in Datei AUTHOR schreiben
+      # Setup Git on Windows
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Create Pull Request # Pull Request erstellen
-        uses: peter-evans/create-pull-request@v3 # Version des peter-evans/create-pull-request@v3-Actions
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} # GitHub-Token
-          branch: "auto-pr-branch" # Branch, in den gemergt werden soll
-          base: "main" # Basis-Branch
-          commit-message: "Automated commit message" # Commit-Nachricht
-          title: "Automated Pull Request" # Titel des Pull Requests
-          commiter: ${{ steps.extract.outputs.gitCommitAuthorName }} # Commiter
-          body: | # Inhalt des Pull Requests
-            This is an automated pull request created by a GitHub Actions workflow. 
-          delete-branch: true # Branch nach Merge löschen
-          labels: automated-pr # Label
-          reviewers: "username1,username2"  # Reviewer
+      # Checkout gh-pages branch or create it if it doesn't exist
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin
+          git checkout -B gh-pages
 
+      # Move the generated HTML file to the gh-pages branch and rename it to index.html
+      - name: Move HTML file
+        run: |
+          move zusammenfassung.html index.html
+
+      # Commit and push the changes to gh-pages branch
+      - name: Commit and push changes
+        run: |
+          git add index.html
+          git commit -m "Deploy Zusammenfassung to GitHub Pages"
+          git push origin gh-pages --force
